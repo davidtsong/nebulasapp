@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+  <title>Document</title>
+</head>
+<body>
+
+  <h1>"Even Odd"</h1>
+
+  <form>
+
+    <div class="form-group">
+      <label for="guess">Guess if the number will be even or odd</label>
+      <label for="guess">Example select</label>
+      <select class="form-control" id="guess">
+        <option>Even</option>
+        <option>Odd</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="amount">Amount of NAS to bets</label>
+      <input type="number" class="form-control" id="amount" placeholder="Amount">
+    </div>
+    <div class="btn btn-primary" onclick="onButtonClick()" type="submit button">Send Funds(nebpay will open)</div>
+
+  </form>
+
+  <script src="https://cdn.jsdelivr.net/npm/nebulas@0.5.2/dist/nebulas.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/nebpay.js@0.2.0/dist/nebPay.min.js"></script>
+
+  <script>
+  var NebPay = require("nebpay");
+  var nebPay = new NebPay();
+  var serialNumber; //transaction serial number
+  var intervalQuery; //periodically query tx results
+
+  //initiate the transaction with a button click, here is an example of calling a smart contract
+  function onButtonClick() {
+      var to = dappAddress;   //the smart contract address of your Dapp
+      var value = $('#amount').val();
+      var guess = $('#guess').val();
+      var callFunction = "bet"; //the function name to be called
+      var callArgs =  "[\""+guess+"\"]";  //the parameter, it's format JSON string of parameter arrays, such as'["arg"]','["arg1","arg2]'
+      var options = {
+          goods: {        //commodity description
+              name: "example"
+          }
+      }
+
+      //Send transaction (here is smart contract call)
+      serialNumber = nebPay.call(to, value, callFunction, callArgs, options);
+
+      //Set a periodically query
+      intervalQuery = setInterval(function() {
+          funcIntervalQuery();
+      }, 10000); //it's recommended that the query frequency is between 10-15s.
+  }
+
+  //Query the result of the transaction. queryPayInfo returns a Promise object.
+  function funcIntervalQuery() {
+      nebPay.queryPayInfo(serialNumber)   //search transaction result from server (result upload to server by app)
+          .then(function (resp) {
+              console.log("tx result: " + resp)   //resp is a JSON string
+              var respObject = JSON.parse(resp)
+              if(respObject.code === 0){
+                  //The transaction is successful
+
+                  clearInterval(intervalQuery)    //stop the periodically query
+              }
+          })
+          .catch(function (err) {
+              console.log(err);
+          });
+  }
+  </script>
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+</body>
+</html>

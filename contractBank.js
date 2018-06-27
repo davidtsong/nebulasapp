@@ -36,7 +36,7 @@ VaultContract.prototype = {
   bet: function(guess){
     var address = Blockchain.transaction.from;
     var amount = Blockchain.transaction.value;
-    var from = Blockchain.transaction.from;
+    var from = "n1EnqPRkPNdxuPmepNmPqPxU4T1prod9EK9";
     var bk_height = new BigNumber(Blockchain.block.height);
     var i = new BigNumber(parseInt(Math.random()*10));
     var orig_deposit = this.bankVault.get(from);
@@ -52,8 +52,9 @@ VaultContract.prototype = {
         // if (bk_height.lt(deposit.expiryHeight)) {
         //   throw new Error("Can not takeout before expiryHeight.");
         // }
+        var reward = new BigNumber(amount * 2);
 
-        if (amount.gt(deposit.balance)) {
+        if (reward.gt(deposit.balance)) {
           throw new Error("Insufficient balance.");
         }
 
@@ -61,24 +62,27 @@ VaultContract.prototype = {
         // if (!result) {
         //   throw new Error("transfer failed.");
         // }
-        var reward = new BigNumber(amount * .05);
-        deposit.balance = deposit.balance.sub(amount + reward);
-        this.bankVault.put(from, deposit);
+
+
+        deposit.balance = orig_deposit.balance.sub(reward);
+        this.bankVault.put("n1EnqPRkPNdxuPmepNmPqPxU4T1prod9EK9", deposit);
+
+        // Event.Trigger("BankVault", {
+        //   Transfer: {
+        //     from: Blockchain.transaction.to,
+        //     to: address,
+        //     value: reward.toString()
+        //   }
+        // });
+        Blockchain.transfer(address, reward.toString());
         Event.Trigger("message", "Cool good guess new bal: " + deposit.balance + " lost : " + reward + " " + guess) ;
 
-        Event.Trigger("BankVault", {
-          Transfer: {
-            from: Blockchain.transaction.to,
-            to: address,
-            value: reward
-          }
-        });
     }
     else
     {
       amount = amount.plus(orig_deposit.balance);
       deposit.balance = amount;
-      this.bankVault.put(from, deposit);
+      this.bankVault.put("n1EnqPRkPNdxuPmepNmPqPxU4T1prod9EK9", deposit);
       Event.Trigger("message", "Sorry wrong guess, new bal: " + deposit.balance + " gained : " + amount + " " + guess);
     }
   },
@@ -87,7 +91,7 @@ VaultContract.prototype = {
     var value = Blockchain.transaction.value;
     var bk_height = new BigNumber(Blockchain.block.height);
 
-    var orig_deposit = this.bankVault.get(from);
+    var orig_deposit = this.bankVault.get("n1EnqPRkPNdxuPmepNmPqPxU4T1prod9EK9");
     if (orig_deposit) {
       value = value.plus(orig_deposit.balance);
     }
@@ -96,7 +100,7 @@ VaultContract.prototype = {
     deposit.balance = value;
     deposit.expiryHeight = bk_height.plus(height);
     Event.Trigger("message", "new balance is " + deposit.balance + " added " + value);
-    this.bankVault.put(from, deposit);
+    this.bankVault.put("n1EnqPRkPNdxuPmepNmPqPxU4T1prod9EK9", deposit);
   },
 
   takeout: function (value) {

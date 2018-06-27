@@ -26,7 +26,7 @@
       <input type="number" class="form-control" id="amount" placeholder="Amount">
     </div>
     <div class="btn btn-primary" onclick="onButtonClick()" type="submit button">Send Funds(nebpay will open)</div>
-
+    <p color ="green" id="outcome"> This will tell you the outcome <p>
   </form>
 
   <script src="https://cdn.jsdelivr.net/npm/nebulas@0.5.2/dist/nebulas.js"></script>
@@ -40,7 +40,7 @@
 
   //initiate the transaction with a button click, here is an example of calling a smart contract
   function onButtonClick() {
-      var to = dappAddress;   //the smart contract address of your Dapp
+      var to = "n1tWNKktRtm8QWNa7KoKSxBHfAJ32YqJuRy";   //the smart contract address of your Dapp
       var value = $('#amount').val();
       var guess = $('#guess').val();
       var callFunction = "bet"; //the function name to be called
@@ -68,7 +68,7 @@
               var respObject = JSON.parse(resp)
               if(respObject.code === 0){
                   //The transaction is successful
-
+                  $("#outcome").text(respObject.toString());
                   clearInterval(intervalQuery)    //stop the periodically query
               }
           })

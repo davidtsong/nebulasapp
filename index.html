@@ -33,25 +33,29 @@
   <script src="https://cdn.jsdelivr.net/npm/nebpay.js@0.2.0/dist/nebPay.min.js"></script>
 
   <script>
+  var tx;
   var NebPay = require("nebpay");
   var nebPay = new NebPay();
   var serialNumber; //transaction serial number
-  var intervalQuery; //periodically query tx results
+  var intervalQuery; //periodically query tx results]
+  var api = new Neb().api;
+  neb.setRequest(new HttpRequest("https://testnet.nebulas.io"));
 
   //initiate the transaction with a button click, here is an example of calling a smart contract
   function onButtonClick() {
       var to = "n1tWNKktRtm8QWNa7KoKSxBHfAJ32YqJuRy";   //the smart contract address of your Dapp
       var value = $('#amount').val();
-      var guess = $('#guess').val().toString();
+      var guess = $('#guess').val();
       var enableDebug = true
 
       var callFunction = "bet"; //the function name to be called
-      var callArgs =  [`${guess}`];  //the parameter, it's format JSON string of parameter arrays, such as'["arg"]','["arg1","arg2]'
+      var callArgs =  "[\"" + guess+"\"]";  //the parameter, it's format JSON string of parameter arrays, such as'["arg"]','["arg1","arg2]'
       var options = {
           goods: {        //commodity description
-              name: "example"
+              name: "evenodd"
           },
-          callback: NebPay.config.testnetUrl
+          callback: NebPay.config.testnetUrl,
+          listener: listenerFunction
       }
 
       //Send transaction (here is smart contract call)
@@ -63,6 +67,12 @@
       }, 10000); //it's recommended that the query frequency is between 10-15s.
   }
 
+  function listenerFunction(serialNumber,result){
+    var json = result;
+     console.log(`the transaction result for ${serialNumber} is: ` + json["txhash"]);
+      tx = json["txhash"];
+      // $("#outcome").text(JSON.stringify(json));
+   }
   //Query the result of the transaction. queryPayInfo returns a Promise object.
   function funcIntervalQuery() {
       nebPay.queryPayInfo(serialNumber)   //search transaction result from server (result upload to server by app)
@@ -71,8 +81,17 @@
               var respObject = JSON.parse(resp)
               if(respObject.code === 0){
                   //The transaction is successful
-                  $("#outcome").text(respObject.toString());
-                  clearInterval(intervalQuery)    //stop the periodically query
+                  // $("#outcome").text(tx);
+                  api.getEventsByHash({hash: "ec239d532249f84f158ef8ec9262e1d3d439709ebf4dd5f7c1036b26c6fe8073"}).then(function(events) {
+                    //code
+                    $("#outcome").text(JSON.stringify(events));
+                      });
+
+                  // neb.api.getTransactionReceipt(tx, function (err, resp) {
+                  //
+                  //                $("#outcome").text(JSON.stringify(resp));
+                  //             });
+                  // clearInterval(intervalQuery)    //stop the periodically query
               }
           })
           .catch(function (err) {

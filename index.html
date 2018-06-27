@@ -42,13 +42,16 @@
   function onButtonClick() {
       var to = "n1tWNKktRtm8QWNa7KoKSxBHfAJ32YqJuRy";   //the smart contract address of your Dapp
       var value = $('#amount').val();
-      var guess = $('#guess').val();
+      var guess = $('#guess').val().toString();
+      var enableDebug = true
+
       var callFunction = "bet"; //the function name to be called
-      var callArgs =  "[\""+guess+"\"]";  //the parameter, it's format JSON string of parameter arrays, such as'["arg"]','["arg1","arg2]'
+      var callArgs =  [`${guess}`];  //the parameter, it's format JSON string of parameter arrays, such as'["arg"]','["arg1","arg2]'
       var options = {
           goods: {        //commodity description
               name: "example"
-          }
+          },
+          callback: NebPay.config.testnetUrl
       }
 
       //Send transaction (here is smart contract call)

@@ -22,15 +22,15 @@
       </select>
     </div>
     <div class="form-group">
-      <label for="amount">Amount of NAS to bets</label>
-      <input type="number" class="form-control" id="amount" placeholder="Amount">
+      <label for="amount">Amount of NAS to bet</label>
+      <input type="number" max =".005" class="form-control" id="amount" placeholder="Amount">
     </div>
     <div class="btn btn-primary" onclick="onButtonClick()" type="submit button">Send Funds(nebpay will open)</div>
-    <p color ="green" id="outcome"> This will tell you the outcome <p>
+    <p id="outcome">Please do not bet more than .005 NAS at the moment<p>
   </form>
 
-  <script src="https://cdn.jsdelivr.net/npm/nebulas@0.5.2/dist/nebulas.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/nebpay.js@0.2.0/dist/nebPay.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/nebulas@0.5.2/dist/nebulas.js"></script>
 
   <script>
   var tx;
@@ -38,15 +38,13 @@
   var nebPay = new NebPay();
   var serialNumber; //transaction serial number
   var intervalQuery; //periodically query tx results]
-  var api = new Neb().api;
-  neb.setRequest(new HttpRequest("https://testnet.nebulas.io"));
 
   //initiate the transaction with a button click, here is an example of calling a smart contract
   function onButtonClick() {
       var to = "n1tWNKktRtm8QWNa7KoKSxBHfAJ32YqJuRy";   //the smart contract address of your Dapp
       var value = $('#amount').val();
       var guess = $('#guess').val();
-      var enableDebug = true
+      var enableDebug = true;
 
       var callFunction = "bet"; //the function name to be called
       var callArgs =  "[\"" + guess+"\"]";  //the parameter, it's format JSON string of parameter arrays, such as'["arg"]','["arg1","arg2]'
@@ -54,6 +52,9 @@
           goods: {        //commodity description
               name: "evenodd"
           },
+          qrcode: {
+        		showQRCode: false,      //Whether to display QR code information
+        	},
           callback: NebPay.config.testnetUrl,
           listener: listenerFunction
       }
@@ -81,17 +82,8 @@
               var respObject = JSON.parse(resp)
               if(respObject.code === 0){
                   //The transaction is successful
-                  // $("#outcome").text(tx);
-                  api.getEventsByHash({hash: "ec239d532249f84f158ef8ec9262e1d3d439709ebf4dd5f7c1036b26c6fe8073"}).then(function(events) {
-                    //code
-                    $("#outcome").text(JSON.stringify(events));
-                      });
+                  $("#outcome").text("Transaction Succesful, Check trasnaction hash and wallet to see if you got the answer correct");
 
-                  // neb.api.getTransactionReceipt(tx, function (err, resp) {
-                  //
-                  //                $("#outcome").text(JSON.stringify(resp));
-                  //             });
-                  // clearInterval(intervalQuery)    //stop the periodically query
               }
           })
           .catch(function (err) {

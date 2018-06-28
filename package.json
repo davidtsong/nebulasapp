@@ -4,5 +4,8 @@
 	"dependencies": {
 		"nebpay.js": "^0.2.0",
 		"nebulas": "^0.5.2"
+	},
+	"devDependencies": {
+		"gulp": "^3.9.1"
 	}
 }

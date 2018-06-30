@@ -41,7 +41,7 @@
 
   //initiate the transaction with a button click, here is an example of calling a smart contract
   function onButtonClick() {
-      var to = "n1tWNKktRtm8QWNa7KoKSxBHfAJ32YqJuRy";   //the smart contract address of your Dapp
+      var to = "n1vAjrWPZ3yPSaJ9yyuYUtYMwct6WGqTz85";   //the smart contract address of your Dapp
       var value = $('#amount').val();
       var guess = $('#guess').val();
       var enableDebug = true;
@@ -55,7 +55,7 @@
           qrcode: {
         		showQRCode: false,      //Whether to display QR code information
         	},
-          callback: NebPay.config.testnetUrl,
+          callback: NebPay.config.mainnetUrl,
           listener: listenerFunction
       }
 

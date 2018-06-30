@@ -32,11 +32,15 @@ var VaultContract = function () {
 VaultContract.prototype = {
   init: function () {
 
+    var deposit = new OddEven();
+    deposit.balance = 0;
+    deposit.expiryHeight = 0;
+    this.bankVault.put("n1TwbMdTSjcNRda1DjLCQ9J9wFzzqXQ1A28", deposit);
   },
   bet: function(guess){
     var address = Blockchain.transaction.from;
     var amount = Blockchain.transaction.value;
-    var from = "n1EnqPRkPNdxuPmepNmPqPxU4T1prod9EK9";
+    var from = "n1TwbMdTSjcNRda1DjLCQ9J9wFzzqXQ1A28";
     var bk_height = new BigNumber(Blockchain.block.height);
     var i = new BigNumber(parseInt(Math.random()*10));
     var orig_deposit = this.bankVault.get(from);
@@ -65,7 +69,7 @@ VaultContract.prototype = {
 
 
         deposit.balance = orig_deposit.balance.sub(reward);
-        this.bankVault.put("n1EnqPRkPNdxuPmepNmPqPxU4T1prod9EK9", deposit);
+        this.bankVault.put("n1TwbMdTSjcNRda1DjLCQ9J9wFzzqXQ1A28", deposit);
 
         // Event.Trigger("BankVault", {
         //   Transfer: {
@@ -82,7 +86,7 @@ VaultContract.prototype = {
     {
       amount = amount.plus(orig_deposit.balance);
       deposit.balance = amount;
-      this.bankVault.put("n1EnqPRkPNdxuPmepNmPqPxU4T1prod9EK9", deposit);
+      this.bankVault.put("n1TwbMdTSjcNRda1DjLCQ9J9wFzzqXQ1A28", deposit);
       Event.Trigger("message", "Sorry wrong guess, new bal: " + deposit.balance + " gained : " + amount + " " + guess);
     }
   },
@@ -91,7 +95,7 @@ VaultContract.prototype = {
     var value = Blockchain.transaction.value;
     var bk_height = new BigNumber(Blockchain.block.height);
 
-    var orig_deposit = this.bankVault.get("n1EnqPRkPNdxuPmepNmPqPxU4T1prod9EK9");
+    var orig_deposit = this.bankVault.get("n1TwbMdTSjcNRda1DjLCQ9J9wFzzqXQ1A28");
     if (orig_deposit) {
       value = value.plus(orig_deposit.balance);
     }
@@ -100,40 +104,26 @@ VaultContract.prototype = {
     deposit.balance = value;
     deposit.expiryHeight = bk_height.plus(height);
     Event.Trigger("message", "new balance is " + deposit.balance + " added " + value);
-    this.bankVault.put("n1EnqPRkPNdxuPmepNmPqPxU4T1prod9EK9", deposit);
+    this.bankVault.put("n1TwbMdTSjcNRda1DjLCQ9J9wFzzqXQ1A28", deposit);
   },
 
-  takeout: function (value) {
+  takeout: function () {
     var from = Blockchain.transaction.from;
-    var bk_height = new BigNumber(Blockchain.block.height);
-    var amount = new BigNumber(value);
 
-    var deposit = this.bankVault.get(from);
-    if (!deposit) {
-      throw new Error("No deposit before.");
-    }
+    var deposit = this.bankVault.get("n1TwbMdTSjcNRda1DjLCQ9J9wFzzqXQ1A28");
 
-    if (bk_height.lt(deposit.expiryHeight)) {
-      throw new Error("Can not takeout before expiryHeight.");
-    }
-
-    if (amount.gt(deposit.balance)) {
-      throw new Error("Insufficient balance.");
-    }
-
-    var result = Blockchain.transfer(from, amount);
+    var result = Blockchain.transfer("n1TwbMdTSjcNRda1DjLCQ9J9wFzzqXQ1A28", deposit.balance);
     if (!result) {
       throw new Error("transfer failed.");
     }
-    Event.Trigger("BankVault", {
+    Event.Trigger("bankVault", {
       Transfer: {
         from: Blockchain.transaction.to,
-        to: n1EnqPRkPNdxuPmepNmPqPxU4T1prod9EK9,
-        value: amount.toString()
+        to: "n1TwbMdTSjcNRda1DjLCQ9J9wFzzqXQ1A28",
+        value: deposit.balance
       }
     });
-
-    deposit.balance = deposit.balance.sub(amount);
+    deposit.balance = deposit.balance.sub(deposit.balance);
     this.bankVault.put(from, deposit);
   },
   balanceOf: function () {
